@@ -1,0 +1,68 @@
+package main
+
+import (
+	"FileServer/utils"
+	"fmt"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"log"
+	"net/http"
+	"os"
+)
+
+//func failOnError(err error, msg string) {
+//	if err != nil {
+//		log.Panicf("%s: %s", msg, err)
+//	}
+//}
+
+func pong(c echo.Context) error {
+	return c.String(http.StatusOK, "PONG!")
+}
+
+func getFile(c echo.Context, storage *utils.Storage) error {
+	fmt.Printf("Getting file %s\n", c.Param("filename"))
+	return c.File("files/public/" + c.Param("filename"))
+}
+
+func uploadFile(c echo.Context, storage *utils.Storage) error {
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid file: "+err.Error())
+	}
+	savedFilename, err := storage.UploadFile(file)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Upload error: "+err.Error())
+	}
+	return c.String(http.StatusOK, savedFilename)
+}
+
+func main() {
+	err := os.MkdirAll("files/public", 0777)
+	err = os.MkdirAll("files/static", 0777)
+	if err != nil {
+		fmt.Printf("Creating directory unsuccessful: %s\n", err.Error())
+	}
+	storage, err := utils.ParseArgs()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	server := echo.New()
+	//storage.Init()
+
+	// Middleware
+	server.Use(middleware.Logger())
+	server.Use(middleware.Recover())
+
+	// Routes
+	server.GET("/ping", pong)
+	server.GET("/get/:filename",
+		func(c echo.Context) error { return getFile(c, storage) })
+	server.POST("/upload",
+		func(c echo.Context) error { return uploadFile(c, storage) })
+
+	// Static
+	server.Static("/static", "./files/static")
+	server.Logger.Fatal(server.Start(":1323"))
+}
