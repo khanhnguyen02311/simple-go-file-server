@@ -2,13 +2,14 @@
 
 A simple file server with upload and download capabilities, used for personal projects. Written in Go.
 
-Start server:
+### Start server:
+
 ```go mod tidy```
 ```go run main.go --flags-if-needed--```
 
-Flags:
+### Flags:
 
-| flag                       | Attribute                                                                                          |
+| Flag                       | Attribute                                                                                          |
 |----------------------------|----------------------------------------------------------------------------------------------------|
 | ```-h / --help```          | CLI help                                                                                           |
 | ```-p / --port```          | Port to run the server on (default: 1323)                                                          |
@@ -18,3 +19,9 @@ Flags:
 | ```-a / --auth-endpoint``` | Authentication endpoint to validate tokens (if needed) (default: "")                               |
 | ```-l / --allowed-list```  | Comma separated list of allowed MIME types. Example: 'image/png,image/jpeg,video/mp4' (default: *) |
 | ```-m / --max-file-size``` | Max file size in MB (default: 0 as unlimited)                                                      |
+
+### Endpoints:
+
+- ```GET /ping``` - Ping pong with server
+- ```GET /get/{filename}``` - Get file by filename
+- ```POST /upload``` - Upload file
