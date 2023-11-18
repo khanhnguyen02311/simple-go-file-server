@@ -1,4 +1,4 @@
-FROM golang:1.19
+FROM golang:1.21 AS builder
 
 WORKDIR /app
 
@@ -8,12 +8,20 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o bin/server .
+RUN CGO_ENABLED=0 GOOS=linux go build -o bin/server
+
+FROM golang:1.21-alpine AS runner
+
+WORKDIR /app
+
+COPY --from=builder /app/bin/server ./bin/server
+
+STOPSIGNAL SIGQUIT
 
 CMD ./bin/server \
-    --port 8000 \
+    --port 1323 \
     --type local \
     --upload-auth false \
     --download-auth false \
     --allowed-list image/png,image/jpeg,image/jpg,image/gif,image/webp \
-    --max-size 10
+    --max-file-size 10
