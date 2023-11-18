@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 //func failOnError(err error, msg string) {
@@ -26,11 +27,13 @@ func getFile(c echo.Context, storage *utils.Storage) error {
 }
 
 func uploadFile(c echo.Context, storage *utils.Storage) error {
+	accessToken := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
+	fmt.Printf("Token from header: %s\n", accessToken)
 	file, err := c.FormFile("file")
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid file: "+err.Error())
 	}
-	savedFilename, err := storage.UploadFile(file)
+	savedFilename, err := storage.UploadFile(file, accessToken)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Upload error: "+err.Error())
 	}

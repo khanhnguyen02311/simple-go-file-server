@@ -30,9 +30,9 @@ func (s *Storage) Init() {
 	//fmt.Printf("Storage initialized: %+v", s)
 }
 
-func (s *Storage) GetFile(fileName string) ([]byte, error) {
-	if s.DownloadAuth && s.validatePermission("token", fileName) == false {
-		return nil, errors.New("invalid permission")
+func (s *Storage) GetFile(fileName string, accessToken string) ([]byte, error) {
+	if s.DownloadAuth && s.validatePermission(accessToken, fileName) == false {
+		return nil, errors.New("invalid token")
 	}
 	switch s.Type {
 	case "local":
@@ -44,9 +44,9 @@ func (s *Storage) GetFile(fileName string) ([]byte, error) {
 	}
 }
 
-func (s *Storage) UploadFile(file *multipart.FileHeader) (string, error) {
-	if s.UploadAuth && s.validatePermission("token", file.Filename) == false {
-		return "", errors.New("invalid permission")
+func (s *Storage) UploadFile(file *multipart.FileHeader, accessToken string) (string, error) {
+	if s.UploadAuth && s.validatePermission(accessToken, file.Filename) == false {
+		return "", errors.New("invalid token")
 	}
 	switch s.Type {
 	case "local":
@@ -59,7 +59,7 @@ func (s *Storage) UploadFile(file *multipart.FileHeader) (string, error) {
 }
 
 func (s *Storage) validatePermission(accessToken string, fileName string) bool {
-	fmt.Println("Validating connection...")
+	fmt.Println("Validating token " + accessToken + " for file " + fileName + "...")
 	// TODO: ask the application if the token is valid, for later
 	return true
 }
