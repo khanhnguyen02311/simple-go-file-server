@@ -5,6 +5,7 @@ A simple file server with upload and download capabilities, used for personal pr
 ### Start server:
 
 ```go mod tidy```
+
 ```go run main.go --flags-if-needed--```
 
 ### Flags:
@@ -25,3 +26,9 @@ A simple file server with upload and download capabilities, used for personal pr
 - ```GET /ping``` - Ping pong with server
 - ```GET /get/{filename}``` - Get file by filename
 - ```POST /upload``` - Upload file
+
+### Run with Docker:
+
+```docker build -t go-simple-file-server .```
+
+```docker run -p 1323:1323 go-simple-file-server --name file-server```

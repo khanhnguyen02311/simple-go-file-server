@@ -76,8 +76,9 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
-# storage folders
+# runtime-generated folders
 files/
+bin/
 
 # environment files
 .env
