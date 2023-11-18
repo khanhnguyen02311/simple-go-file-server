@@ -27,8 +27,15 @@ func getFile(c echo.Context, storage *utils.Storage) error {
 }
 
 func uploadFile(c echo.Context, storage *utils.Storage) error {
-	accessToken := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	fmt.Printf("Token from header: %s\n", accessToken)
+	accessToken := ""
+	if storage.UploadAuth == true {
+		authorizationHeader := strings.Split(c.Request().Header.Get("Authorization"), " ")
+		if authorizationHeader[0] != "Bearer" {
+			return c.String(http.StatusBadRequest, "Invalid token")
+		}
+		accessToken = authorizationHeader[1]
+	}
+	//fmt.Printf("Token from header: %s\n", accessToken)
 	file, err := c.FormFile("file")
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid file: "+err.Error())
