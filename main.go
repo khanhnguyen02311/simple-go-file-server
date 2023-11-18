@@ -43,13 +43,14 @@ func main() {
 	if err != nil {
 		fmt.Printf("Creating directory unsuccessful: %s\n", err.Error())
 	}
-	storage, err := utils.ParseArgs()
+	err = utils.ParseArgs()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 	server := echo.New()
-	//storage.Init()
+	storage := &utils.Storage{}
+	storage.Init()
 
 	// Middleware
 	server.Use(middleware.Logger())
@@ -64,5 +65,5 @@ func main() {
 
 	// Static
 	server.Static("/static", "./files/static")
-	server.Logger.Fatal(server.Start(":1323"))
+	server.Logger.Fatal(server.Start(":" + *utils.ConfigArgs.Port))
 }

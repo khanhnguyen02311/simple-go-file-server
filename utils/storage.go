@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"os"
 	"path"
+	"strings"
 )
 
 type Storage struct {
@@ -19,9 +20,15 @@ type Storage struct {
 	MaxFileSize      int
 }
 
-//func (s *Storage) Init() {
-//	fmt.Printf("Storage initialized\n")
-//}
+func (s *Storage) Init() {
+	s.Type = *ConfigArgs.Type
+	s.UploadAuth = *ConfigArgs.UploadAuth == "true"
+	s.DownloadAuth = *ConfigArgs.DownloadAuth == "true"
+	s.AuthEndpoint = *ConfigArgs.AuthEndpoint
+	s.AllowedMIMETypes = strings.Split(*ConfigArgs.AllowedMIMETypes, ",")
+	s.MaxFileSize = *ConfigArgs.MaxFileSize
+	//fmt.Printf("Storage initialized: %+v", s)
+}
 
 func (s *Storage) GetFile(fileName string) ([]byte, error) {
 	if s.DownloadAuth && s.validatePermission("token", fileName) == false {
@@ -53,7 +60,7 @@ func (s *Storage) UploadFile(file *multipart.FileHeader) (string, error) {
 
 func (s *Storage) validatePermission(accessToken string, fileName string) bool {
 	fmt.Println("Validating connection...")
-	// ask the application if the token is valid, for later
+	// TODO: ask the application if the token is valid, for later
 	return true
 }
 
@@ -90,11 +97,11 @@ func (s *Storage) saveToLocal(file *multipart.FileHeader) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// TODO: create background task to change the file type to jpeg and move it to the public directory
 	defer destination.Close()
 	if _, err = io.Copy(destination, source); err != nil {
 		return "", err
 	}
+	// TODO: create background task to convert the file type to jpeg and move it to the public directory
 	return uuidName, nil
 }
 

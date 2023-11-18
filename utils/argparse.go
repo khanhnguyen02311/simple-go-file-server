@@ -5,13 +5,29 @@ import (
 	"fmt"
 	"github.com/akamensky/argparse"
 	"os"
-	"strings"
 )
 
-func ParseArgs() (*Storage, error) {
+type AppConfig struct {
+	Port             *string
+	Type             *string
+	UploadAuth       *string
+	DownloadAuth     *string
+	AuthEndpoint     *string
+	AllowedMIMETypes *string
+	MaxFileSize      *int
+}
+
+var ConfigArgs *AppConfig
+
+func ParseArgs() error {
 	// Create new parser object
 	parser := argparse.NewParser("Go Simple File Server", "Simple file server with upload and download capabilities, used for personal projects")
-	// Create string flag
+	// Create flags
+	argPort := parser.String("p", "port", &argparse.Options{
+		Required: false,
+		Default:  "1323",
+		Help:     "Port to run the server on"},
+	)
 	argType := parser.Selector("t", "type", []string{"local", "s3"}, &argparse.Options{
 		Required: false,
 		Default:  "local",
@@ -48,26 +64,29 @@ func ParseArgs() (*Storage, error) {
 		// In case of error print error and print usage
 		// This can also be done by passing -h or --help flags
 		fmt.Print(parser.Usage(err))
-		return nil, err
+		return err
 	}
 	if (*argUploadAuth == "true" || *argDownloadAuth == "true") && *argAuthEndpoint == "" {
-		return nil, errors.New("auth-endpoint must be provided when download-auth or upload-auth is enabled")
+		return errors.New("auth-endpoint must be provided when download-auth or upload-auth is enabled")
 	}
 	// Finally print the collected string
 	fmt.Println(
-		"Runtime configs: \n- Type:", *argType,
+		"Runtime configs: \n- Port:", *argPort,
+		"\n- Type:", *argType,
 		"\n- Upload Authentication:", *argUploadAuth,
 		"\n- Download Authentication:", *argDownloadAuth,
 		"\n- Authentication Endpoint:", *argAuthEndpoint,
 		"\n- Allowed MIME types: [", *argAllowedMIMEs, "]",
 		"\n- Max file size in MB (0 is unlimited):", *argMaxFileSize)
 
-	return &Storage{
-		Type:             *argType,
-		UploadAuth:       *argUploadAuth == "true",
-		DownloadAuth:     *argDownloadAuth == "true",
-		AuthEndpoint:     *argAuthEndpoint,
-		AllowedMIMETypes: strings.Split(*argAllowedMIMEs, ","),
-		MaxFileSize:      *argMaxFileSize,
-	}, nil
+	ConfigArgs = &AppConfig{
+		Port:             argPort,
+		Type:             argType,
+		UploadAuth:       argUploadAuth,
+		DownloadAuth:     argDownloadAuth,
+		AuthEndpoint:     argAuthEndpoint,
+		AllowedMIMETypes: argAllowedMIMEs,
+		MaxFileSize:      argMaxFileSize,
+	}
+	return nil
 }
