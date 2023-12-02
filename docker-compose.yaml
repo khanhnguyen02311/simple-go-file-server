@@ -1,0 +1,11 @@
+version: '4'
+
+services:
+  file-server:
+    build: .
+    ports: 
+      - "1323:8080"
+    volumes:
+      - ./docker_volumes/files:/app/files
+    environment:
+      - PORT=8080

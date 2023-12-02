@@ -16,12 +16,10 @@ WORKDIR /app
 
 COPY --from=builder /app/bin/server ./bin/server
 
+COPY entrypoint.sh ./
+
+RUN chmod +x ./entrypoint.sh
+
 STOPSIGNAL SIGQUIT
 
-CMD ./bin/server \
-    --port 1323 \
-    --type local \
-    --upload-auth false \
-    --download-auth false \
-    --allowed-list image/png,image/jpeg,image/jpg,image/gif,image/webp \
-    --max-file-size 10
+ENTRYPOINT [ "/app/entrypoint.sh" ]
