@@ -1,5 +1,7 @@
 FROM golang:1.21 AS builder
 
+RUN useradd -u 1001 -m nonroot
+
 WORKDIR /app
 
 COPY go.mod go.sum ./
@@ -14,14 +16,16 @@ FROM golang:1.21-alpine AS runner
 
 WORKDIR /app
 
+COPY --from=builder /etc/passwd /etc/passwd
+
 COPY --from=builder /app/bin/server ./bin/server
+
+COPY entrypoint.sh ./
+
+RUN chmod +x ./entrypoint.sh
 
 STOPSIGNAL SIGQUIT
 
-CMD ./bin/server \
-    --port 1323 \
-    --type local \
-    --upload-auth false \
-    --download-auth false \
-    --allowed-list image/png,image/jpeg,image/jpg,image/gif,image/webp \
-    --max-file-size 10
+USER 1001
+
+ENTRYPOINT [ "/app/entrypoint.sh" ]
