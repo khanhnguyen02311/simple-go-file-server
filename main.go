@@ -67,13 +67,13 @@ func main() {
 	server.Use(middleware.Recover())
 
 	// Routes
-	server.GET("/ping", pong)
-	server.GET("/get/:filename",
+	server.GET("/fs/ping", pong)
+	server.GET("/fs/get/:filename",
 		func(c echo.Context) error { return getFile(c, storage) })
-	server.POST("/upload",
+	server.POST("/fs/upload",
 		func(c echo.Context) error { return uploadFile(c, storage) })
 
 	// Static
-	server.Static("/static", "./files/static")
+	server.Static("/fs/static", "./files/static")
 	server.Logger.Fatal(server.Start(":" + *utils.ConfigArgs.Port))
 }
